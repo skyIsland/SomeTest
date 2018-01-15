@@ -95,7 +95,7 @@ namespace IsMatch.Helper
             //开始下载
             foreach (var img in imageList)
             {
-                var imgUrl = img.ImageUrl;
+                var imgUrl = img.ImageUrl.Replace("bmiddle","large");
                 if (!ImageUrlList.Contains(imgUrl))
                 {
                     var dirImageCount = Directory.GetDirectories(savePath);
