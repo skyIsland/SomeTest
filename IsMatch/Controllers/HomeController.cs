@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using IsMatch.Models;
-using IsMatch.Util;
+using IsMatch.Helper;
 
 namespace IsMatch.Controllers
 {
@@ -13,20 +13,23 @@ namespace IsMatch.Controllers
     {
         public IActionResult Index()
         {
-            ViewBag.List = AngelSharpDom.RenderDouBanHtml();
+            var db = new DouBan();
+            ViewBag.List = db.GetListBelle();
             return View();
         }
 
         public IActionResult About()
         {
-            ViewData["Message"] = "Your application description page.";
+            ViewData["Title"] = "关于我";
+            ViewData["Message"] = "克莱登大学南极洲文学史副教授.";
 
             return View();
         }
 
         public IActionResult Contact()
         {
-            ViewData["Message"] = "Your contact page.";
+            ViewData["Title"] = "联系方式";
+            ViewData["Message"] = "暂无";
 
             return View();
         }
