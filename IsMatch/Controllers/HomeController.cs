@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using IsMatch.Models;
+using IsMatch.Util;
 
 namespace IsMatch.Controllers
 {
@@ -12,6 +13,7 @@ namespace IsMatch.Controllers
     {
         public IActionResult Index()
         {
+            ViewBag.List = AngelSharpDom.RenderDouBanHtml();
             return View();
         }
 
