@@ -1,12 +1,16 @@
-﻿@using IsMatch.Helper; 
+﻿@using IsMatch.Helper;
 <h2>@ViewData["Title"]</h2>
 <h3>@ViewData["Message"]</h3>
 
 
-@{ 
-    var db = new DouBan();
-    db.DownloadAllImage();
-}
+@*@{
+        var db = new DouBan();
+        db.DownloadAllImage();
+    }*@
+@{
+        var factory = new Mm131();
+        factory.DownloadAllImage();
+    }
 <address>
     <strong>Support:</strong> <a href="mailto:ismatch@qq.com">ismatch@qq.com</a><br />
 </address>

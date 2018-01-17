@@ -13,8 +13,9 @@ namespace IsMatch.Controllers
     {
         public IActionResult Index()
         {
-            var db = new DouBan();
-            ViewBag.List = db.GetListBelle();
+            var factory = new DouBan();
+            //var factory=new Mm131();
+            ViewBag.List = factory.GetListBelle();
             return View();
         }
 

@@ -115,6 +115,24 @@
         </div>
     }
 }
+@*@{
+    foreach (var item in list)
+    {
+        var data = item.ImageUrls;
+        foreach (var itemImageUrl in data)
+        {
+            <div class="card">
+                <img src="@itemImageUrl.Split("-")[1]" alt="" style="width:100%;">
+                <div class="containers">
+                    <p>
+                        @(item.Title + data.IndexOf(itemImageUrl) + 1)
+                    </p>
+                </div>
+            </div>
+        }
+        
+    }
+}*@
 @*<div class="row">
         <div class="col-md-3">
             <h2>Application uses</h2>
