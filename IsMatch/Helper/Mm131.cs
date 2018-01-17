@@ -58,6 +58,9 @@ namespace IsMatch.Helper
 
                 // We are only interested in the text - select it with LINQ
                 List<Belle> list = new List<Belle>();
+
+                // 
+                var ii = 0;
                 foreach (var item in cells)
                 {
                     var title = item.QuerySelector("a").TextContent;
@@ -69,6 +72,8 @@ namespace IsMatch.Helper
                     // 图片页数 
                     var pageNum = detailDoc.QuerySelectorAll(".page-ch").First().TextContent.Replace("页", "").Replace("共", "").ToInt(-1);
 
+                    // 强行20页
+                    pageNum = pageNum > 20 ? 20 : pageNum;
                     if (pageNum > 0)
                     {
                         // 
@@ -105,6 +110,10 @@ namespace IsMatch.Helper
                         list.Add(belle);
                     }
                     if(flag)
+                        break;
+                    // 遍历太多了 太卡了(对方服务器卡)  只取20条
+                    ii++;
+                    if (ii > 5)
                         break;
                 }
                 return list;
@@ -159,6 +168,8 @@ namespace IsMatch.Helper
             foreach (var imgs in imageList)
             {
                 var imgList = imgs.ImageUrls;
+                if (imgs.Title.Contains("错误"))
+                    continue;
                 var newSavePath = savePath + "\\" + imgs.Title.Replace(" ","");
                 if (!Directory.Exists(newSavePath))
                 {
