@@ -7,12 +7,12 @@ namespace MyTest
     {
         static void Main(string[] args)
         {
-            var str = "54页";
+            var str = "第54页";
 
-            var s = from p in str where p.ToInt(-1) > 0 select p;
-
+            var s = from p in str where p.ToString().ToInt(-1) > 0 select p;
 
             var result = string.Empty;
+
             foreach (var c in str)
             {
                 var a = c.ToInt(-1);
