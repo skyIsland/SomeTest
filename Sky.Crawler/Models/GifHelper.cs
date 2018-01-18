@@ -40,7 +40,7 @@ namespace Sky.Crawler.Models
         {
             if (encoding == null)
             {
-                encoding = Encoding.GetEncoding("UTF8");
+                encoding = Encoding.GetEncoding("UTF-8");
             }
             var str = string.Empty;
             using (var wc = new WebClient())
@@ -73,28 +73,41 @@ namespace Sky.Crawler.Models
             var firstImgList = GetList(address);
 
             var ids = (List<string>)firstImgList["ids"];
-            ids.ForEach(detail =>
+            ids.ForEach(detailId =>
             {
-                // 每一个图片集
-                if (!detail.IsNullOrWhiteSpace())
-                {
-                    var info = GetImageInfos(detail);
-                    if (!info.Title.IsNullOrWhiteSpace())
+                //Task.Factory.StartNew(() =>
+                //{
+                    // 每一个图片集
+                    if (!detailId.IsNullOrWhiteSpace())
                     {
-                        var filePath = savePath + "\\" + info.Title.Trim();
-                        if (!Directory.Exists(filePath))
-                            Directory.CreateDirectory(filePath);
-
-                        var urls = info.Urls;
-                        urls.ForEach(url =>
+                        var detailAddress = string.Format(DetailAddress, detailId);
+                        var info = GetImageInfos(detailAddress);
+                        if (!info.Title.IsNullOrWhiteSpace())
                         {
-                            using (var wc = new WebClient())
+                            var filePath = savePath + "\\" + info.Title.Trim();
+                            if (!Directory.Exists(filePath))
+                                Directory.CreateDirectory(filePath);
+
+                            // log
+                            NewLife.Log.XTrace.WriteLine($"**************************id为{detailId}的图片集开始抓取....");
+
+                            var urls = info.Urls;
+                            urls.ForEach(url =>
                             {
-                                wc.DownloadFile(url,Path.Combine(filePath,Path.GetFileName(url)??Guid.NewGuid().ToString().Substring(0,10)));
-                            }
-                        });                       
+                                using (var wc = new WebClient())
+                                {
+                                    wc.DownloadFile(url, Path.Combine(filePath, Path.GetFileName(url) ?? Guid.NewGuid().ToString().Substring(0, 10)));
+
+                                    NewLife.Log.XTrace.WriteLine($"链接为{url}的图片下载完成....*");
+                                }
+                            });
+
+                            NewLife.Log.XTrace.WriteLine($"id为{detailId}的图片集抓取完毕....**************************");
+
+                        }
                     }
-                }
+               // });
+                
             });
             // 递归调用
             var isMore = (bool) firstImgList["more"];
@@ -113,7 +126,7 @@ namespace Sky.Crawler.Models
             var listAddress=new List<string>();
 
             // 获取返回信息
-            var result = JsonConvert.DeserializeObject<DuoWan.DwResult>(GetUrlString(Address));
+            var result = JsonConvert.DeserializeObject<DuoWan.DwResult>(GetUrlString(address));
 
             var document=new JumonyParser().Parse(result.html);
 
@@ -125,16 +138,9 @@ namespace Sky.Crawler.Models
                 var detailUrl = li.Attribute("href").Value();
 
                 // 获取id
-                listAddress.Add((from each in detailUrl where each.ToString().ToInt(-1) > 0 select each).ToString());
+                listAddress.Add((from each in detailUrl where each.ToString().ToInt(-1) > 0 select each).Join(""));
             }
-
-            //listAddress.ForEach(detail =>
-            //{
-            //    if (!detail.IsNullOrWhiteSpace())
-            //    {
-            //        var imgInfos = GetImageInfos(detail);
-            //    }
-            //});
+          
             var o=new Hashtable()
             {
                 {"more",result.more },
@@ -151,6 +157,8 @@ namespace Sky.Crawler.Models
         public ImageInfo GetImageInfos(string address)
         {
             var result = JsonConvert.DeserializeObject<DuoWan.DetailResult>(GetUrlString(address));
+            if (result == null)
+                return new ImageInfo();
             if (result.gallery_title.IsNullOrWhiteSpace())
             {
                 return  new ImageInfo();
@@ -165,6 +173,7 @@ namespace Sky.Crawler.Models
 
             return info;
         }
+
                     
     }
 }
