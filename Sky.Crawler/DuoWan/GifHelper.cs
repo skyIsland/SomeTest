@@ -10,15 +10,16 @@ using System.Threading.Tasks;
 using Ivony.Html;
 using Ivony.Html.Parser;
 using Newtonsoft.Json;
+using Sky.Crawler.Models;
 
-namespace Sky.Crawler.Models
+namespace Sky.Crawler
 {
     /// <summary>
     /// http://tu.duowan.com/m/bxgif
     /// </summary>
     public class GifHelper //: ICrawler<ImageInfo<DuoWan.DwResult>, IHtmlDocument>
     {
-        private string FileSavePath = ConfigurationManager.AppSettings["SaveFilePath"];
+        private string FileSavePath = "E:\\CrawlerResult";
 
         private string Address = "http://tu.duowan.com/m/bxgif?offset={0}&order=created&math=0.594337572215683";
 
@@ -96,7 +97,7 @@ namespace Sky.Crawler.Models
                             {
                                 using (var wc = new WebClient())
                                 {
-                                    wc.DownloadFile(url, Path.Combine(filePath, Path.GetFileName(url) ?? Guid.NewGuid().ToString().Substring(0, 10)));
+                                    wc.DownloadFile((string) url, Path.Combine(filePath, Path.GetFileName(url) ?? Guid.NewGuid().ToString().Substring(0, 10)));
 
                                     NewLife.Log.XTrace.WriteLine($"链接为{url}的图片下载完成....*");
                                 }

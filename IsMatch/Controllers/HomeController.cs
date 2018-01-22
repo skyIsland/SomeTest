@@ -5,8 +5,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using IsMatch.Models;
-using IsMatch.Helper;
 using Microsoft.Extensions.Options;
+using Sky.Crawler;
 
 namespace IsMatch.Controllers
 {

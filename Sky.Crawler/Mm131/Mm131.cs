@@ -1,5 +1,5 @@
 ﻿using AngleSharp;
-using IsMatch.Models;
+using Sky.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using AngleSharp.Dom.Html;
 using AngleSharp.Parser.Html;
 
-namespace IsMatch.Helper
+namespace Sky.Crawler
 {
     /// <summary>
     /// MM131 图片处理 http://www.mm131.com
@@ -273,8 +273,8 @@ namespace IsMatch.Helper
         /// <returns></returns>
         public IHtmlDocument GetHtmlString(string address,Encoding encoding=null)
         {
-            // 注册模块
-            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            // 注册模块 .net core
+           // Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             if (encoding == null)
             {
                 encoding=Encoding.GetEncoding("GB2312");

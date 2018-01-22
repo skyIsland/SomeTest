@@ -1,13 +1,14 @@
-﻿using AngleSharp;
-using IsMatch.Models;
+﻿using Sky.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
+using System.Text;
 using System.Threading.Tasks;
+using AngleSharp.Dom.Html;
+using AngleSharp.Parser.Html;
 
-namespace IsMatch.Helper
+namespace Sky.Crawler
 {
     /// <summary>
     /// 豆瓣图片处理 url:https://www.dbmeinv.com/dbgroup/show.htm
@@ -30,10 +31,41 @@ namespace IsMatch.Helper
         /// 已下载图片链接
         /// </summary>
         private List<string> ImageUrlList = new List<string>();
-        //public DouBan()
-        //{
-        //    FilesSaveSrc=   
-        //}
+
+
+        /// <summary>
+        /// 网页源代码
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="encoding"></param>
+        /// <returns></returns>
+        public string GetUrlString(string address, Encoding encoding = null)
+        {
+            if (encoding == null)
+            {
+                encoding = Encoding.GetEncoding("UTF-8");
+            }
+            var str = string.Empty;
+            using (var wc = new WebClient())
+            {
+                wc.Encoding = encoding;
+                str = wc.DownloadString(address);
+            }
+            return str;
+        }
+
+        /// <summary>
+        /// 获取网页源代码并转换为IHtmlDocument
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="encoding"></param>
+        /// <returns></returns>
+        public IHtmlDocument GetHtmlDocumet(string address, Encoding encoding = null)
+        {
+            var resultStr = GetUrlString(address, encoding);
+            return new HtmlParser().Parse(resultStr);
+        }
+
         /// <summary>
         /// 获取指定链接下的图片(默认随机获取某个分类下的第一页图片)
         /// </summary>
@@ -44,17 +76,14 @@ namespace IsMatch.Helper
             // 随机数
             var rand = new Random();
 
-            // 设置配置以支持文档加载
-            var config = Configuration.Default.WithDefaultLoader();
-
             // 豆瓣地址
             var address = string.IsNullOrWhiteSpace(url)?"https://www.dbmeinv.com/dbgroup/show.htm?cid=" + Ids[rand.Next(Ids.Length)]:url;
 
             // 请求豆辨网
-            var document = BrowsingContext.New(config).OpenAsync(address);
+            var document = GetHtmlDocumet(address);
 
             // 根据class获取html元素
-            var cells = document.Result.QuerySelectorAll(".panel-body li");
+            var cells = document.QuerySelectorAll(".panel-body li");
 
             // We are only interested in the text - select it with LINQ
             List<Belle> list = new List<Belle>();
@@ -69,6 +98,7 @@ namespace IsMatch.Helper
             }
             return list;
         }
+
         /// <summary>
         /// 
         /// </summary>
@@ -133,6 +163,7 @@ namespace IsMatch.Helper
             // 递归调用
             Do_Task(savePath, cid, index + 1);
         }
+
         /// <summary>
         /// 暴力获取所有图片....
         /// </summary>
@@ -148,6 +179,5 @@ namespace IsMatch.Helper
             }
         }
     }
-
 
 }
