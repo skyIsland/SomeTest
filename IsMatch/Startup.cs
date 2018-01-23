@@ -36,6 +36,14 @@ namespace IsMatch
             services.Configure<Param>(Configuration);
 
             services.AddMvc();
+
+            //var builder = new ConfigurationBuilder();
+            //builder.AddInMemoryCollection();
+            //var config = builder.Build();
+            //config["someKey"] = "someValue";
+
+            // do some other work
+            //var setting = config["someKey"];
         }
 
         /// <summary>
@@ -48,7 +56,8 @@ namespace IsMatch
             if (env.IsDevelopment())
             {
                 app.UseBrowserLink();// 中间件的扩展方法 添加到IApplicationBuilder(请求管道)上
-                app.UseDeveloperExceptionPage();
+                //app.UseDeveloperExceptionPage();
+                app.UseExceptionHandler("/Home/Error");
             }
             else
             {

@@ -27,7 +27,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyTest", "MyTest\MyTest.csp
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "06.Crawler", "06.Crawler", "{46EA459A-BA97-48FA-A6C2-1C4CDA331EFA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sky.Crawler", "Sky.Crawler\Sky.Crawler.csproj", "{EDF6BA61-CD87-4DA4-A3AA-586AC6E5CC0C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sky.Crawler", "Sky.Crawler\Sky.Crawler.csproj", "{EDF6BA61-CD87-4DA4-A3AA-586AC6E5CC0C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

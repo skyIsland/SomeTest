@@ -1,22 +1,37 @@
-﻿@model ErrorViewModel
-@{
-    ViewData["Title"] = "Error";
+﻿@{
+    Layout = null;
 }
 
-<h1 class="text-danger">Error.</h1>
-<h2 class="text-danger">An error occurred while processing your request.</h2>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>服务器开小差了</title>
+    <link href="http://www.pintuer.com/css/pintuer.css" rel="stylesheet" />
+</head>
 
-@if (Model.ShowRequestId)
-{
-    <p>
-        <strong>Request ID:</strong> <code>@Model.RequestId</code>
-    </p>
-}
+<body>
+<div class="container" style=" margin-top:8%;">
+    <div class="panel margin-big-top">
+        <div class="text-center">
+            <br>
+            <h2 class="padding-top"> <strong>服务器开小差了</strong> </h2>
+            <div class="">
+                <div class="float-left">
+                    <img src="https://github.com/skyIsland/Sky.Blog.Web/blob/master/Sky.Web/Content/images/ds-1.gif?raw=true">
+                    <div class="alert"> 卧槽！服务器居然开小差了！ </div>
+                </div>
+                <div class="float-right">
+                    <img src="https://github.com/skyIsland/Sky.Blog.Web/blob/master/Sky.Web/Content/images/ds-2.png?raw=true" width="260">
+                </div>
+            </div>
+            <div class="padding-big">
+                <a href="/" class="button bg-yellow">返回首页</a>
+                <a href="#" class="button">保证不打死丹麦的面包不单卖</a>
+            </div>
+        </div>
+    </div>
+</div>
+    
 
-<h3>Development Mode</h3>
-<p>
-    Swapping to <strong>Development</strong> environment will display more detailed information about the error that occurred.
-</p>
-<p>
-    <strong>Development environment should not be enabled in deployed applications</strong>, as it can result in sensitive information from exceptions being displayed to end users. For local debugging, development environment can be enabled by setting the <strong>ASPNETCORE_ENVIRONMENT</strong> environment variable to <strong>Development</strong>, and restarting the application.
-</p>
+</body>
+</html>

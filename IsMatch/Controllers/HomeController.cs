@@ -34,6 +34,7 @@ namespace IsMatch.Controllers
 
         public IActionResult Contact()
         {
+            //throw new DivideByZeroException();
             ViewData["Title"] = "联系方式";
             ViewData["Message"] = "暂无";
 
@@ -52,5 +53,6 @@ namespace IsMatch.Controllers
             ViewBag.List = factory.GetListBelle();
             return View();
         }
+      
     }
 }
