@@ -1,4 +1,5 @@
-﻿using Sky.Util;
+﻿using MyTest.Config;
+using Sky.Util;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -87,7 +88,16 @@ namespace Sky.Crawler.FlySign
                     var msg = string.Format("Fly社区签到信息如下:<br>签到 {0},消息: {1}", resultObj.status == 0 ? "成功" : "失败",
                         resultObj.msg);
                     NewLife.Log.XTrace.Log.Info(msg);
-                   // EmailHandler.SendSmtpEMail("ismatch@qq.com","Fly社区签到",msg,new EmailHandler.SendAcccount{SmtpHost = "SMTP.163.com"});
+
+                    // 发送邮件
+                    try
+                    {
+                        var emailCfg = ConfigHelper.GetBasicConfig().EmailCfg;
+                        EmailHandler.SendSmtpEMail("ismatch@qq.com", "Fly社区签到结果", msg, new EmailHandler.SendAcccount { SmtpHost = emailCfg.SmtpHost, SmtpUser = emailCfg.SmtpUser, SmtpPassword = emailCfg.SmtpPassword });
+                    }
+                    catch (Exception)
+                    {
+                    }
                 }
             }
 

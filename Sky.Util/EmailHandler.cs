@@ -15,13 +15,13 @@ namespace Sky.Util
         public class SendAcccount
         {
             /// <summary> SMTP服务器地址 </summary>
-            public string SmtpHost { get; set; }
+            public string SmtpHost { get; set; } = "smtp.163.com";
 
             /// <summary> 登录账号 </summary>
-            public string SmtpUser { get; set; }
+            public string SmtpUser { get; set; } = "18377578962@163.com";
 
             /// <summary> 登录密码 </summary>
-            public string SmtpPassword { get; set; }
+            public string SmtpPassword { get; set; } = "961031787meng";
 
         }
         /// <summary>
