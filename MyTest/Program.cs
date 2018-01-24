@@ -29,6 +29,9 @@ namespace MyTest
             Console.ReadKey();
         }
 
+        /// <summary>
+        /// 签到 todo:定时轮子:http://blog.csdn.net/u013711462/article/details/53449799
+        /// </summary>
         static void StartSign()
         {
             var fly = new FlySignIn("11b42a2ba0df589f65dc68dcf9e6657273ac1118",

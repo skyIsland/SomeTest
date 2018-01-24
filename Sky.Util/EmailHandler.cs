@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace Sky.Util
 {
+    /// <summary>
+    /// 邮件处理 todo:有轮子 http://www.1234.sh/post/pomelo-extensions-smtp
+    /// </summary>
     public class EmailHandler
     {
         public class SendAcccount
