@@ -7,7 +7,6 @@
 
   <ItemGroup>
     <PackageReference Include="NewLife.Core" Version="6.5.6575.43008" />
-    <PackageReference Include="TimedJob" Version="2.0.0" />
   </ItemGroup>
 
   <ItemGroup>

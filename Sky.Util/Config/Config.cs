@@ -9,9 +9,9 @@ namespace MyTest.Config
     /// </summary>
     public class Config
     {
-        public EmailConfig EmailCfg { get; set; }
+        public EmailConfig EmailCfg { get; set; }=new EmailConfig();
 
-        public FlyAccountConfig FlyCfg { get; set; }
+        public FlyAccountConfig FlyCfg { get; set; }=new FlyAccountConfig();
 
         /// <summary>
         /// 邮箱信息

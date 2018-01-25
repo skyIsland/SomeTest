@@ -44,11 +44,5 @@
     <Compile Include="EntityBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Sky.Util\Sky.Util.csproj">
-      <Project>{ca81f95f-58c1-4167-9db2-9a9c195652e4}</Project>
-      <Name>Sky.Util</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
