@@ -15,12 +15,24 @@ namespace Sky.Crawler.FlySign
     /// </summary>
     public class FlySignIn
     {
+
+        #region 相关字段
+
+        /// <summary>
+        /// 登录地址
+        /// </summary>
+        private string LoginUrl = "http://fly.layui.com/user/login/";
+
         /// <summary>
         /// 签到地址
         /// </summary>
         private string SignUrl = "http://fly.layui.com/sign/in";
 
+        /// <summary>
+        /// 签到状态地址
+        /// </summary>
         private string StatusUrl = "http://fly.layui.com/sign/status";
+
         /// <summary>
         /// token todo:获取token (sign/status 该链接可得到当前签到状态以及token信息(值,过期时间)) 
         /// </summary>
@@ -30,6 +42,10 @@ namespace Sky.Crawler.FlySign
         /// Cookie
         /// </summary>
         private string CookieData { get; set; }
+
+        #endregion
+
+        #region 构造函数
 
         /// <summary>
         /// 构造函数传参
@@ -42,6 +58,10 @@ namespace Sky.Crawler.FlySign
             this.CookieData = cookieData;
         }
 
+        #endregion
+
+        #region Main入口
+
         /// <summary>
         /// 程序入口
         /// </summary>
@@ -53,6 +73,63 @@ namespace Sky.Crawler.FlySign
                 SignIn(SignUrl, FormData, CookieData);
             }
         }
+
+        #endregion
+
+        #region 登录
+
+        /// <summary>
+        /// 从题库中获取人类验证问题答案
+        /// </summary>
+        /// <param name="vercodeText">人类验证问题</param>
+        /// <returns>人类验证问题答案</returns>
+        private string GetVercode(string vercodeText)
+        {
+            return vercodeText.Contains("请在输入框填上字符") ? vercodeText.Split("：")[1] : _vercodeBook[vercodeText];
+        }
+
+        /// <summary>
+        /// 人类验证题库
+        /// </summary>
+        private readonly Dictionary<string, string> _vercodeBook = new Dictionary<string, string>
+        {
+            {"a和c之间的字母是？","b" },
+            {"layui 的作者是谁？","贤心" },
+            {"\"100\" > \"2\" 的结果是 true 还是 false？","true" },
+            //{"请在输入框填上字符：ejd1egzl5688gdk7s1exw29","ejd1egzl5688gdk7s1exw29" },
+            {"贤心是男是女？","男" },
+            {"爱Fly社区吗？请回答：爱","爱" },
+            { "请在输入框填上：我爱layui","我爱layui" },
+            { "Fly社区采用 Node.js 编写，yes or no？","yes" },
+            { "\"1 3 2 4 6 5 7 __\" 请写出\"__\"处的数字","9" },
+        };
+        #endregion
+
+        #region 签到状态
+
+        /// <summary>
+        /// 获取签到状态
+        /// </summary>
+        /// <param name="url">请求地址</param>
+        /// <param name="cookieData">cookie</param>
+        /// <returns>是否需要签到</returns>
+        private bool GetStatus(string url, string cookieData)
+        {
+            bool flag = false;
+            var resultStr = DownloadString(url, "", cookieData);
+            var resultObj = resultStr.ToJsonEntity<Result>();
+            if (resultObj.status == 0)
+            {
+                // 赋值token
+                FormData = "token=" + resultObj.data.token;
+                flag = resultObj.data.signed;
+            }
+            return flag;
+        }
+
+        #endregion
+
+        #region 签到请求
 
         /// <summary>
         /// 签到
@@ -90,31 +167,10 @@ namespace Sky.Crawler.FlySign
             {
 
             }
-
-
-
-
         }
+        #endregion
 
-        /// <summary>
-        /// 获取签到状态
-        /// </summary>
-        /// <param name="url">请求地址</param>
-        /// <param name="cookieData">cookie</param>
-        /// <returns>是否需要签到</returns>
-        private bool GetStatus(string url, string cookieData)
-        {
-            bool flag = false;
-            var resultStr = DownloadString(url, "", cookieData);
-            var resultObj = resultStr.ToJsonEntity<Result>();
-            if (resultObj.status == 0)
-            {
-                // 赋值token
-                FormData = "token="+resultObj.data.token;
-                flag = resultObj.data.signed;
-            }
-            return flag;
-        }
+        #region 访问url
 
         /// <summary>
         /// 简单的fly社区post获取数据
@@ -130,7 +186,12 @@ namespace Sky.Crawler.FlySign
 
             // 定义相关请求头
             request.Accept = "application/json, text/javascript, */*; q=0.01";
-            request.Headers.Add(HttpRequestHeader.Cookie, cookieData);
+
+            // cookie 
+            if (!string.IsNullOrWhiteSpace(cookieData))
+            {
+                request.Headers.Add(HttpRequestHeader.Cookie, cookieData);
+            }
             request.Referer = "http://fly.layui.com/";
             request.UserAgent =
                 "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36";
@@ -163,6 +224,9 @@ namespace Sky.Crawler.FlySign
             return resultStr;
         }
 
+        #endregion
+
+        #region Fly社区ajax返回结果类
 
         private class Result
         {
@@ -198,5 +262,10 @@ namespace Sky.Crawler.FlySign
                 public string token { get; set; }
             }
         }
+
+
+        #endregion
+
+
     }
 }
