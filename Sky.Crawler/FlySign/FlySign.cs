@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
+using AngleSharp.Parser.Html;
 using NewLife.Serialization;
 
 namespace Sky.Crawler.FlySign
@@ -19,30 +20,51 @@ namespace Sky.Crawler.FlySign
         #region 相关字段
 
         /// <summary>
+        /// 登录账号
+        /// </summary>
+        private string _loginName;
+
+        /// <summary>
+        /// 登录密码
+        /// </summary>
+        private string _loginPwd;
+
+        /// <summary>
         /// 登录地址
         /// </summary>
-        private string LoginUrl = "http://fly.layui.com/user/login/";
+        private string _loginUrl = "http://fly.layui.com/user/login/";
 
         /// <summary>
         /// 签到地址
         /// </summary>
-        private string SignUrl = "http://fly.layui.com/sign/in";
+        private string _signUrl = "http://fly.layui.com/sign/in";
 
         /// <summary>
         /// 签到状态地址
         /// </summary>
-        private string StatusUrl = "http://fly.layui.com/sign/status";
+        private string _statusUrl = "http://fly.layui.com/sign/status";
 
         /// <summary>
         /// token todo:获取token (sign/status 该链接可得到当前签到状态以及token信息(值,过期时间)) 
         /// </summary>
-        private string FormData { get; set; }
+        private string _token { get; set; }
+
+        ///// <summary>
+        ///// Cookie
+        ///// </summary>
+        //private string CookieData { get; set; }
 
         /// <summary>
-        /// Cookie
+        /// 是否跟踪cookie
         /// </summary>
-        private string CookieData { get; set; }
+        private bool _isTrackCookies = false;
 
+        /// <summary>
+        /// Cookie字典
+        /// </summary>
+        private Dictionary<string, Cookie> _cookiesDic = new Dictionary<string, Cookie>();
+
+        private string _logPath = @"..\";
         #endregion
 
         #region 构造函数
@@ -50,12 +72,12 @@ namespace Sky.Crawler.FlySign
         /// <summary>
         /// 构造函数传参
         /// </summary>
-        /// <param name="formData"></param>
-        /// <param name="cookieData"></param>
-        public FlySignIn(string cookieData, string formData = "1")
+        /// <param name="loginName"></param>
+        /// <param name="loginPwd"></param>
+        public FlySignIn(string loginName, string loginPwd)
         {
-            this.FormData = "token=" + formData;
-            this.CookieData = cookieData;
+            this._loginName = loginName;
+            this._loginPwd = loginPwd;
         }
 
         #endregion
@@ -67,25 +89,72 @@ namespace Sky.Crawler.FlySign
         /// </summary>
         public void Start()
         {
-            var signed = GetStatus(StatusUrl, CookieData);
-            if (!signed)
-            {
-                SignIn(SignUrl, FormData, CookieData);
-            }
+            Login(_loginName, _loginPwd);
         }
 
         #endregion
 
         #region 登录
 
+        private void Login(string loginName, string loginPwd)
+        {
+            _isTrackCookies = true;
+
+            var str = DownloadString(_loginUrl, false);
+
+            // parser
+            var document = new HtmlParser().Parse(str);
+
+            // get vercodeText
+            var vercodeText = document
+                .QuerySelector("#LAY_ucm > div > div > form > div:nth-child(3) > div.layui-form-mid > span")
+                .TextContent;
+
+            var answer = GetAnswer(vercodeText);
+
+            // login
+            var cookieStr = GetCookieStr();
+            var parameter = $"email={loginName}&pass={loginPwd}&vercode={answer}";
+            var response = DownloadString(_loginUrl, true, parameter, cookieStr).ToJsonEntity<Result>();
+            if (response.status == 1)
+            {
+                var message = $"登录失败,原因:{response.msg}";
+                WriteLog(message);
+                SendEmail(message);
+
+                return;
+            }
+
+            // getSignStatus
+            _isTrackCookies = false;
+
+            cookieStr = GetCookieStr();
+            var signed = GetStatus(_statusUrl, GetCookieStr());
+            if (!signed)
+            {
+                SignIn(_signUrl, _token, cookieStr);
+            }
+            // 
+
+        }
+
         /// <summary>
         /// 从题库中获取人类验证问题答案
         /// </summary>
         /// <param name="vercodeText">人类验证问题</param>
         /// <returns>人类验证问题答案</returns>
-        private string GetVercode(string vercodeText)
+        private string GetAnswer(string vercodeText)
         {
-            return vercodeText.Contains("请在输入框填上字符") ? vercodeText.Split("：")[1] : _vercodeBook[vercodeText];
+            string result;
+            if (vercodeText.Contains("请在输入框填上") || vercodeText.Contains("请在输入框填上字符"))
+            {
+                result = vercodeText.Split("：")[1];
+            }
+            else
+            {
+                result = _vercodeBook[vercodeText];
+            }
+            return result;
         }
 
         /// <summary>
@@ -99,7 +168,7 @@ namespace Sky.Crawler.FlySign
             //{"请在输入框填上字符：ejd1egzl5688gdk7s1exw29","ejd1egzl5688gdk7s1exw29" },
             {"贤心是男是女？","男" },
             {"爱Fly社区吗？请回答：爱","爱" },
-            { "请在输入框填上：我爱layui","我爱layui" },
+            //{ "请在输入框填上：我爱layui","我爱layui" },
             { "Fly社区采用 Node.js 编写，yes or no？","yes" },
             { "\"1 3 2 4 6 5 7 __\" 请写出\"__\"处的数字","9" },
         };
@@ -116,13 +185,17 @@ namespace Sky.Crawler.FlySign
         private bool GetStatus(string url, string cookieData)
         {
             bool flag = false;
-            var resultStr = DownloadString(url, "", cookieData);
+            var resultStr = DownloadString(url, true, "", cookieData);
             var resultObj = resultStr.ToJsonEntity<Result>();
             if (resultObj.status == 0)
             {
                 // 赋值token
-                FormData = "token=" + resultObj.data.token;
+                _token = "token=" + resultObj.data.token;
                 flag = resultObj.data.signed;
+            }
+            else
+            {
+                SendEmail($"获取签到状态失败:{resultObj.msg}");
             }
             return flag;
         }
@@ -135,57 +208,42 @@ namespace Sky.Crawler.FlySign
         /// 签到
         /// </summary>
         /// <param name="url"></param>
-        /// <param name="formData">token参数</param>
+        /// <param name="parameter">token参数</param>
         /// <param name="cookieData">cookie</param>
-        private void SignIn(string url, string formData, string cookieData)
+        private void SignIn(string url, string parameter, string cookieData)
         {
 
-            var resultStr = DownloadString(url, formData, cookieData);
+            var resultStr = DownloadString(url, true, parameter, cookieData);
 
             var resultObj = resultStr.ToJsonEntity<Result>();
 
             // 
             var msg = string.Format("Fly社区签到信息如下:<br>签到 {0},消息: {1}", resultObj.status == 0 ? "成功" : "失败",
                 resultObj.msg);
-            //var msg = string.Format("Fly社区签到信息如下:<br>签到 {0},消息: {1}", "失败",
-            //    "测试");
-            NewLife.Log.XTrace.Log.Info(msg);
+
+            WriteLog(msg);
 
             // 发送邮件
-            try
-            {
-                var emailCfg = ConfigHelper.GetBasicConfig().EmailCfg;
-                EmailHandler.SendSmtpEMail("ismatch@qq.com", "Fly社区签到结果", msg,
-                    new EmailHandler.SendAcccount
-                    {
-                        SmtpHost = emailCfg.SmtpHost,
-                        SmtpUser = emailCfg.SmtpUser,
-                        SmtpPassword = emailCfg.SmtpPassword
-                    });
-            }
-            catch (Exception ex)
-            {
-
-            }
+            SendEmail(msg);
         }
         #endregion
 
-        #region 访问url
+        #region Http
 
         /// <summary>
-        /// 简单的fly社区post获取数据
+        /// 简单的fly社区获取数据和html
         /// </summary>
         /// <param name="url">请求链接</param>
+        /// <param name="isPost">是否为post请求</param>
+        /// <param name="parameter">附加参数</param>
         /// <param name="cookieData">cookie</param>
-        /// <param name="formData">附加参数</param>
         /// <returns></returns>
-        private string DownloadString(string url, string formData, string cookieData)
+        private string DownloadString(string url, bool isPost = true, string parameter = "", string cookieData = "")
         {
             string resultStr = "";
             var request = (HttpWebRequest)WebRequest.Create(url);
 
-            // 定义相关请求头
-            request.Accept = "application/json, text/javascript, */*; q=0.01";
+
 
             // cookie 
             if (!string.IsNullOrWhiteSpace(cookieData))
@@ -197,24 +255,52 @@ namespace Sky.Crawler.FlySign
                 "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36";
 
             // post数据相关
-            request.Method = "POST";
-            request.ContentType = "application/x-www-form-urlencoded";
-
-            // 需要传参数
-            if (!formData.IsNullOrWhiteSpace())
+            if (isPost)
             {
-                byte[] byteData = Encoding.UTF8.GetBytes(formData);
-                request.ContentLength = byteData.Length;
-                using (Stream reqStream = request.GetRequestStream())
+                // 定义相关请求头
+                request.Accept = "application/json, text/javascript, */*; q=0.01";
+                request.Method = "POST";
+                request.ContentType = "application/x-www-form-urlencoded";
+
+                // 需要传参数
+                if (!parameter.IsNullOrWhiteSpace())
                 {
-                    reqStream.Write(byteData, 0, byteData.Length);
+                    byte[] byteData = Encoding.UTF8.GetBytes(parameter);
+                    request.ContentLength = byteData.Length;
+                    using (Stream reqStream = request.GetRequestStream())
+                    {
+                        reqStream.Write(byteData, 0, byteData.Length);
+                    }
                 }
             }
+            else
+            {
+                request.Method = "GET";
+            }
+
 
 
             // 发出请求
             using (var response = (HttpWebResponse)request.GetResponse())
             {
+                // isTrackCookies
+                if (_isTrackCookies)
+                {
+                    // TrackCookies(response.Cookies);
+                    CookieCollection cc = new CookieCollection();
+                    string cookieString = response.Headers[HttpResponseHeader.SetCookie];
+                    if (!string.IsNullOrWhiteSpace(cookieString))
+                    {
+                        var spilit = cookieString.Split(';');
+                        foreach (string item in spilit)
+                        {
+                            var kv = item.Split('=');
+                            if (kv.Length == 2)
+                                cc.Add(new Cookie(kv[0].Trim(), kv[1].Trim()));
+                        }
+                    }
+                    TrackCookies(cc);
+                }
                 using (StreamReader reader = new StreamReader(response.GetResponseStream(), Encoding.Default))
                 {
                     resultStr = reader.ReadToEnd();
@@ -224,9 +310,90 @@ namespace Sky.Crawler.FlySign
             return resultStr;
         }
 
+        /// <summary>
+        /// 跟踪cookies
+        /// </summary>
+        /// <param name="cookies"></param>
+        private void TrackCookies(CookieCollection cookies)
+        {
+            if (!_isTrackCookies) return;
+            if (cookies == null) return;
+            foreach (Cookie c in cookies)
+            {
+                if (_cookiesDic.ContainsKey(c.Name))
+                {
+                    _cookiesDic[c.Name] = c;
+                }
+                else
+                {
+                    _cookiesDic.Add(c.Name, c);
+                }
+            }
+
+        }
+
+        /// <summary>
+        /// 格式cookies
+        /// </summary>
+        private string GetCookieStr()
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (KeyValuePair<string, Cookie> item in _cookiesDic)
+            {
+                if (!item.Value.Expired)
+                {
+                    if (sb.Length == 0)
+                    {
+                        sb.Append(item.Key).Append("=").Append(item.Value.Value);
+                    }
+                    else
+                    {
+                        sb.Append("; ").Append(item.Key).Append(" = ").Append(item.Value.Value);
+                    }
+                }
+            }
+            return sb.ToString();
+
+        }
         #endregion
 
-        #region Fly社区ajax返回结果类
+        #region SendEmail & WriteLog
+
+        /// <summary>
+        /// 发送邮件
+        /// </summary>
+        /// <param name="message"></param>
+        private void SendEmail(string message)
+        {
+            try
+            {
+                var emailCfg = ConfigHelper.GetBasicConfig().EmailCfg;
+                EmailHandler.SendSmtpEMail("ismatch@qq.com", "Fly社区签到结果", "Fly社区签到:<br> &nbsp;&nbsp;" + message,
+                    new EmailHandler.SendAcccount
+                    {
+                        SmtpHost = emailCfg.SmtpHost,
+                        SmtpUser = emailCfg.SmtpUser,
+                        SmtpPassword = emailCfg.SmtpPassword
+                    });
+            }
+            catch (Exception ex)
+            {
+                WriteLog($"发送邮件错误,{ex.Message}!");
+            }
+        }
+
+        /// <summary>
+        /// 日志
+        /// </summary>
+        /// <param name="message"></param>
+        private void WriteLog(string message)
+        {
+            NewLife.Log.XTrace.LogPath = _logPath;
+            NewLife.Log.XTrace.WriteLine(message);
+        }
+        #endregion
+
+        #region Fly社区Post请求返回结果类
 
         private class Result
         {
@@ -265,7 +432,6 @@ namespace Sky.Crawler.FlySign
 
 
         #endregion
-
 
     }
 }

@@ -34,9 +34,7 @@ namespace MyTest
         /// </summary>
         static void StartSign()
         {
-            //var flyConfig = ConfigHelper.GetBasicConfig().FlyCfg;
-            var fly = new FlySignIn(
-                "Hm_lvt_a353f6c055ee7ac4ac9d1af83b556ef4=1488963535,1489112224,1489546169; UM_distinctid=15e59c095a1218-0684c1f914c599-3e64430f-1fa400-15e59c095a24bf; CNZZDATA30088308=cnzz_eid%3D792246781-1502875390-http%253A%252F%252Fwww.layui.com%252F%26ntime%3D1516760465; fly-layui=s%3AzyYSaO8b3RspMIV9E1lzKW3J67Ef2uOd.eMRtFxRsPJwfwZrZd17bv4B2dGwzuWE2lS3mC8EazHA", "11b42a2ba0df589f65dc68dcf9e6657273ac1118");
+            var fly = new FlySignIn("1434787335@qq.com","961031787meng");
             fly.Start();
         }
     }
