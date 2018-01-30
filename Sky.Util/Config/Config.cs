@@ -11,7 +11,7 @@ namespace MyTest.Config
     {
         public EmailConfig EmailCfg { get; set; }=new EmailConfig();
 
-        public FlyAccountConfig FlyCfg { get; set; }=new FlyAccountConfig();
+        public FlyConfig FlyCfg { get; set; } = new FlyConfig();
 
         /// <summary>
         /// 邮箱信息
@@ -29,11 +29,15 @@ namespace MyTest.Config
         }
 
         /// <summary>
-        /// Fly社区信息
+        /// 账户信息
         /// </summary>
-        public class FlyAccountConfig
+        public class FlyConfig
         {
-            public string CookieData { get; set; }
+            /// <summary> 登录账号 </summary>
+            public string Email { get; set; } = "";
+
+            /// <summary> 登录密码 </summary>
+            public string Pwd { get; set; } = "";
         }
     }
 }

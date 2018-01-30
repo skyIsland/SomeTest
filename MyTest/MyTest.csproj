@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="NewLife.Core" Version="6.5.6575.43008" />
+    <PackageReference Include="Quartz" Version="3.0.2" />
   </ItemGroup>
 
   <ItemGroup>
