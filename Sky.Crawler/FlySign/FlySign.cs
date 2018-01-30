@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
+using AngleSharp.Parser.Html;
 using NewLife.Serialization;
 using AngleSharp.Parser.Html;
 
@@ -89,62 +90,16 @@ namespace Sky.Crawler.FlySign
         /// </summary>
         public void Start()
         {
-            Login(_loginName, _loginPwd);
-
+            var signed = GetStatus(StatusUrl, CookieData);
+            if (!signed)
+            {
+                SignIn(SignUrl, FormData, CookieData);
+            }
         }
 
         #endregion
 
         #region 登录
-
-        private void Login(string loginName, string loginPwd)
-        {
-            _isTrackCookies = true;
-
-            var str = DownloadString(_loginUrl, false);
-
-            // parser
-            var document = new HtmlParser().Parse(str);
-
-            // get vercodeText
-            var vercodeText = document
-                .QuerySelector("#LAY_ucm > div > div > form > div:nth-child(3) > div.layui-form-mid > span")
-                .TextContent;
-
-            // write vercodeText
-            WriteLog($"当前人类验证题目:{vercodeText}");
-
-            var answer = GetAnswer(vercodeText);
-
-            // login
-            var cookieStr = GetCookieStr();
-            var parameter = $"email={loginName}&pass={loginPwd}&vercode={answer}";
-            var response = DownloadString(_loginUrl, true, parameter, cookieStr).ToJsonEntity<Result>();
-            if (response.status == 1)
-            {
-                var message = $"登录失败,原因:{response.msg},当前人类验证题目:{vercodeText}";
-                WriteLog(message);
-                SendEmail(message);
-
-                return;
-            }
-
-            // getSignStatus
-            _isTrackCookies = false;
-
-            cookieStr = GetCookieStr();
-            var signed = GetStatus(_statusUrl, GetCookieStr());
-            if (!signed)
-            {
-                SignIn(_signUrl, _token, cookieStr);
-            }
-            else
-            {
-                WriteLog("已经签到成功了!无需再签到!");
-            }
-            // 
-
-        }
 
         /// <summary>
         /// 从题库中获取人类验证问题答案
@@ -153,21 +108,8 @@ namespace Sky.Crawler.FlySign
         /// <returns>人类验证问题答案</returns>
         private string GetAnswer(string vercodeText)
         {
-            string result;
-            if (vercodeText.Contains("请在输入框填上") || vercodeText.Contains("请在输入框填上字符"))
-            {
-                result = vercodeText.Split("：")[1];
-            }
-            else if (vercodeText.Contains("加") && vercodeText.Contains("等于几"))
-            {
-                var firstNumber = vercodeText.Split("加")[0].ToInt();
-                Func<string, int> op = p =>
-                {
-                    var firstIndexof = p.IndexOf("加") + 1;
-                    var lastIndexof = p.IndexOf("等于几");
-                    var length = lastIndexof - firstIndexof;
-                    return p.Substring(firstIndexof, length).ToInt();
-                };
+            return vercodeText.Contains("请在输入框填上字符") ? vercodeText.Split("：")[1] : _vercodeBook[vercodeText];
+        }
 
                 result = (firstNumber + op(vercodeText)).ToString();
             }
@@ -244,6 +186,9 @@ namespace Sky.Crawler.FlySign
             // 
             var msg = string.Format("Fly社区签到信息如下:<br>签到 {0},消息: {1}", resultObj.status == 0 ? "成功" : "失败",
                 resultObj.msg);
+            //var msg = string.Format("Fly社区签到信息如下:<br>签到 {0},消息: {1}", "失败",
+            //    "测试");
+            NewLife.Log.XTrace.Log.Info(msg);
 
             WriteLog(msg);
 
