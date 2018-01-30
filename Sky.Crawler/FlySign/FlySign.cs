@@ -7,7 +7,6 @@ using System.Net;
 using System.Text;
 using AngleSharp.Parser.Html;
 using NewLife.Serialization;
-using AngleSharp.Parser.Html;
 
 namespace Sky.Crawler.FlySign
 {
@@ -66,6 +65,7 @@ namespace Sky.Crawler.FlySign
         private Dictionary<string, Cookie> _cookiesDic = new Dictionary<string, Cookie>();
 
         private string _logPath = @"..\";
+
         #endregion
 
         #region 构造函数
@@ -90,16 +90,62 @@ namespace Sky.Crawler.FlySign
         /// </summary>
         public void Start()
         {
-            var signed = GetStatus(StatusUrl, CookieData);
-            if (!signed)
-            {
-                SignIn(SignUrl, FormData, CookieData);
-            }
+            Login(_loginName, _loginPwd);
+
         }
 
         #endregion
 
         #region 登录
+
+        private void Login(string loginName, string loginPwd)
+        {
+            _isTrackCookies = true;
+
+            var str = DownloadString(_loginUrl, false);
+
+            // parser
+            var document = new HtmlParser().Parse(str);
+
+            // get vercodeText
+            var vercodeText = document
+                .QuerySelector("#LAY_ucm > div > div > form > div:nth-child(3) > div.layui-form-mid > span")
+                .TextContent;
+
+            // write vercodeText
+            WriteLog($"当前人类验证题目:{vercodeText}");
+
+            var answer = GetAnswer(vercodeText);
+
+            // login
+            var cookieStr = GetCookieStr();
+            var parameter = $"email={loginName}&pass={loginPwd}&vercode={answer}";
+            var response = DownloadString(_loginUrl, true, parameter, cookieStr).ToJsonEntity<Result>();
+            if (response.status == 1)
+            {
+                var message = $"登录失败,原因:{response.msg},当前人类验证题目:{vercodeText}";
+                WriteLog(message);
+                SendEmail(message);
+
+                return;
+            }
+
+            // getSignStatus
+            _isTrackCookies = false;
+
+            cookieStr = GetCookieStr();
+            var signed = GetStatus(_statusUrl, GetCookieStr());
+            if (!signed)
+            {
+                SignIn(_signUrl, _token, cookieStr);
+            }
+            else
+            {
+                WriteLog("已经签到成功了!无需再签到!");
+            }
+            // 
+
+        }
 
         /// <summary>
         /// 从题库中获取人类验证问题答案
@@ -108,8 +154,21 @@ namespace Sky.Crawler.FlySign
         /// <returns>人类验证问题答案</returns>
         private string GetAnswer(string vercodeText)
         {
-            return vercodeText.Contains("请在输入框填上字符") ? vercodeText.Split("：")[1] : _vercodeBook[vercodeText];
-        }
+            string result;
+            if (vercodeText.Contains("请在输入框填上") || vercodeText.Contains("请在输入框填上字符"))
+            {
+                result = vercodeText.Split("：")[1];
+            }
+            else if (vercodeText.Contains("加") && vercodeText.Contains("等于几"))
+            {
+                var firstNumber = vercodeText.Split("加")[0].ToInt();
+                Func<string, int> op = p =>
+                {
+                    var firstIndexof = p.IndexOf("加") + 1;
+                    var lastIndexof = p.IndexOf("等于几");
+                    var length = lastIndexof - firstIndexof;
+                    return p.Substring(firstIndexof, length).ToInt();
+                };
 
                 result = (firstNumber + op(vercodeText)).ToString();
             }
@@ -125,19 +184,20 @@ namespace Sky.Crawler.FlySign
         /// </summary>
         private readonly Dictionary<string, string> _vercodeBook = new Dictionary<string, string>
         {
-            {"a和c之间的字母是？","b" },
-            {"layui 的作者是谁？","贤心" },
-            {"\"100\" > \"2\" 的结果是 true 还是 false？","false" },// 正确答案应该是true 但是fly社区的答案是false
+            {"a和c之间的字母是？", "b"},
+            {"layui 的作者是谁？", "贤心"},
+            {"\"100\" > \"2\" 的结果是 true 还是 false？", "false"}, // 正确答案应该是true 但是fly社区的答案是false
             //{"请在输入框填上字符：ejd1egzl5688gdk7s1exw29","ejd1egzl5688gdk7s1exw29" },
-            {"贤心是男是女？","男" },
-            {"爱Fly社区吗？请回答：爱","爱" },
+            {"贤心是男是女？", "男"},
+            {"爱Fly社区吗？请回答：爱", "爱"},
             //{ "请在输入框填上：我爱layui","我爱layui" },
-            { "Fly社区采用 Node.js 编写，yes or no？","yes" },
-            { "\"1 3 2 4 6 5 7 __\" 请写出\"__\"处的数字","9" },
-            { "Node.js 诞生于哪一年？","2009" }
+            {"Fly社区采用 Node.js 编写，yes or no？", "yes"},
+            {"\"1 3 2 4 6 5 7 __\" 请写出\"__\"处的数字", "9"},
+            {"Node.js 诞生于哪一年？", "2009"}
             //{ "68加20等于几？","88" },
-            
+
         };
+
         #endregion
 
         #region 签到状态
@@ -186,15 +246,13 @@ namespace Sky.Crawler.FlySign
             // 
             var msg = string.Format("Fly社区签到信息如下:<br>签到 {0},消息: {1}", resultObj.status == 0 ? "成功" : "失败",
                 resultObj.msg);
-            //var msg = string.Format("Fly社区签到信息如下:<br>签到 {0},消息: {1}", "失败",
-            //    "测试");
-            NewLife.Log.XTrace.Log.Info(msg);
 
             WriteLog(msg);
 
             // 发送邮件
             SendEmail(msg);
         }
+
         #endregion
 
         #region Http
@@ -210,7 +268,7 @@ namespace Sky.Crawler.FlySign
         private string DownloadString(string url, bool isPost = true, string parameter = "", string cookieData = "")
         {
             string resultStr = "";
-            var request = (HttpWebRequest)WebRequest.Create(url);
+            var request = (HttpWebRequest) WebRequest.Create(url);
 
 
 
@@ -250,7 +308,7 @@ namespace Sky.Crawler.FlySign
 
 
             // 发出请求
-            using (var response = (HttpWebResponse)request.GetResponse())
+            using (var response = (HttpWebResponse) request.GetResponse())
             {
                 // isTrackCookies
                 if (_isTrackCookies)
@@ -324,6 +382,7 @@ namespace Sky.Crawler.FlySign
             return sb.ToString();
 
         }
+
         #endregion
 
         #region SendEmail & WriteLog
@@ -360,6 +419,7 @@ namespace Sky.Crawler.FlySign
             NewLife.Log.XTrace.LogPath = _logPath;
             NewLife.Log.XTrace.WriteLine(message);
         }
+
         #endregion
 
         #region Fly社区Post请求返回结果类
