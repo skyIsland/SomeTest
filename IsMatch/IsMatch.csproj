@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Properties\PublishProfiles\CustomProfile.pubxml" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.5" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.2" />
     <PackageReference Include="NewLife.Core" Version="6.5.6575.43008" />
@@ -17,6 +21,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Sky.Crawler\Sky.Crawler.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Properties\PublishProfiles\" />
   </ItemGroup>
 
 </Project>
