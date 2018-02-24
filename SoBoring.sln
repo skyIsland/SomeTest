@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27130.2026
+VisualStudioVersion = 15.0.27130.2020
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IsMatch", "IsMatch\IsMatch.csproj", "{1BDDFCDC-2733-412F-9D87-D0B27A149B33}"
 EndProject
@@ -28,6 +28,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sky.Util", "Sky.Util\Sky.Util.csproj", "{DA9E4F3D-A725-4098-B688-1568A75A2607}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sky.Something.Cube", "Sky.Something.Cube\Sky.Something.Cube.csproj", "{3D1EBDB5-ADF4-4BFC-B5C7-E69C56FD58AD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sky.Models", "Sky.Models\Sky.Models.csproj", "{3E30B245-6E76-4B89-AD56-4BEA57C8CF8B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -63,6 +65,10 @@ Global
 		{3D1EBDB5-ADF4-4BFC-B5C7-E69C56FD58AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3D1EBDB5-ADF4-4BFC-B5C7-E69C56FD58AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3D1EBDB5-ADF4-4BFC-B5C7-E69C56FD58AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3E30B245-6E76-4B89-AD56-4BEA57C8CF8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E30B245-6E76-4B89-AD56-4BEA57C8CF8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E30B245-6E76-4B89-AD56-4BEA57C8CF8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E30B245-6E76-4B89-AD56-4BEA57C8CF8B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -75,6 +81,7 @@ Global
 		{EDF6BA61-CD87-4DA4-A3AA-586AC6E5CC0C} = {46EA459A-BA97-48FA-A6C2-1C4CDA331EFA}
 		{DA9E4F3D-A725-4098-B688-1568A75A2607} = {5EAEAAD3-704F-4BE2-905A-C4485DC4DD34}
 		{3D1EBDB5-ADF4-4BFC-B5C7-E69C56FD58AD} = {F7F40BC9-7BCB-4150-AB3C-E6BC5C1731BC}
+		{3E30B245-6E76-4B89-AD56-4BEA57C8CF8B} = {F7F40BC9-7BCB-4150-AB3C-E6BC5C1731BC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F5AFB4E8-0668-4BAB-9B0A-B3A65119DF2D}

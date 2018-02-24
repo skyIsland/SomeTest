@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Tables Version="9.6.6622.37283" NameSpace="Sky.Models" ConnName="Conn" Output="" BaseClass="Entity" UseCNFileName="false">
+  <Table Name="Weight" Description="体重信息" DbType="SqlServer">
+    <Columns>
+      <Column Name="Id" DataType="Int32" Identity="True" PrimaryKey="True" Description="Id" Primary="true" />
+      <Column Name="AddDate" DataType="DateTime" Master="True" Description="添加日期" />
+      <Column Name="Value" DataType="String" Master="True" Description="体重" />
+    </Columns>
+  </Table>
+</Tables>

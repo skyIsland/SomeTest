@@ -188,6 +188,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Areas\WeightManager\Controllers\WeightController.cs" />
+    <Compile Include="Areas\WeightManager\WeightManagerAreaRegistration.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -215,6 +217,7 @@
     <Content Include="Areas\Admin\Views\Index\ProcessModules.cshtml" />
     <Content Include="Areas\Admin\Views\Index\Cache.cshtml" />
     <Content Include="Areas\Admin\Views\Index\Assembly.cshtml" />
+    <Content Include="Areas\WeightManager\Views\web.config" />
     <None Include="packages.config" />
     <Content Include="Views\Shared\_StatLevel.cshtml" />
     <Content Include="Views\Shared\_List_Toolbar_Batch.cshtml" />
@@ -233,11 +236,20 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Areas\WeightManager\Models\" />
+    <Folder Include="Areas\WeightManager\Views\Shared\" />
+    <Folder Include="Areas\WeightManager\Views\Weight\" />
     <Folder Include="Controllers\" />
     <Folder Include="Models\" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Sky.Models\Sky.Models.csproj">
+      <Project>{3e30b245-6e76-4b89-ad56-4bea57c8cf8b}</Project>
+      <Name>Sky.Models</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
